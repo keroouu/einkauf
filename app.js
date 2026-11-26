@@ -106,7 +106,7 @@ function toggleStaple(key) {
     return;
   }
   const listId = state.lists.some(l => l.id === entry.listId) ? entry.listId : currentList()?.id;
-  addItem({ name: entry.name, listId, category: entry.category });
+  addItem({ name: entry.name, listId, category: entry.category, qty: entry.qty || '', note: entry.note || '' });
 }
 
 function setStar(key, on) {
@@ -321,7 +321,8 @@ function stapleRow(c) {
   const sub = state.lists.length > 1 ? listName(c.listId) : '';
   return `<li class="stap ${on ? 'on' : ''}" data-key="${esc(c.id)}" data-action="stap-toggle">
     <span class="check"></span>
-    <div class="txt"><span class="name">${esc(c.name)}</span>${on ? ' <span class="sub">· auf der Liste</span>' : sub ? ` <span class="sub">· ${esc(sub)}</span>` : ''}</div>
+    <div class="txt"><span class="name">${esc(c.name)}</span>${c.qty ? `<span class="qty">${esc(c.qty)}</span>` : ''}${on ? ' <span class="sub">· auf der Liste</span>' : sub ? ` <span class="sub">· ${esc(sub)}</span>` : ''}
+      ${c.note ? `<div class="note">${esc(c.note)}</div>` : ''}</div>
     <button class="icon-btn star-btn ${c.staple ? 'on' : ''}" data-action="star" aria-label="${c.staple ? 'Kein Stammartikel mehr' : 'Als Stammartikel merken'}">${c.staple ? '★' : '☆'}</button>
     <button class="icon-btn" data-action="edit-cat" aria-label="Bearbeiten">⋯</button>
   </li>`;
@@ -448,6 +449,7 @@ function editItem(id) {
       const e = catalogEntry(name);
       backend.set('catalog', keyOf(name), {
         name, category: patch.category, listId: patch.listId,
+        qty: patch.qty, note: patch.note,
         staple: f.get('staple') === 'on',
         count: e?.count || 1, lastUsed: Date.now(),
       });
@@ -462,6 +464,8 @@ function editCatalog(key) {
   openSheet(`
     <h2>${esc(c.name)}</h2>
     <form id="cat-form">
+      <label class="field"><span>Übliche Menge</span><input name="qty" value="${esc(c.qty)}" placeholder="z. B. 2, 500 g"></label>
+      <label class="field"><span>Notiz</span><input name="note" value="${esc(c.note)}" placeholder="z. B. bio, Denns"></label>
       <label class="field"><span>Kategorie</span><select name="category">${categoryOptions(categoryById(c.category).id)}</select></label>
       ${state.lists.length > 1 ? `<label class="field"><span>Kommt auf die Liste</span><select name="listId">${listOptions(c.listId)}</select></label>` : ''}
       <label class="toggle"><input type="checkbox" name="staple" ${c.staple ? 'checked' : ''}>
@@ -481,6 +485,8 @@ function editCatalog(key) {
       ev.preventDefault();
       const f = new FormData(ev.target);
       backend.set('catalog', key, {
+        qty: String(f.get('qty') || '').trim(),
+        note: String(f.get('note') || '').trim(),
         category: f.get('category'),
         listId: f.get('listId') || c.listId,
         staple: f.get('staple') === 'on',
