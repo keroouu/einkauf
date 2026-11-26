@@ -1,0 +1,70 @@
+<!doctype html>
+<html lang="de">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+  <title>Einkauf</title>
+  <meta name="apple-mobile-web-app-capable" content="yes">
+  <meta name="mobile-web-app-capable" content="yes">
+  <meta name="apple-mobile-web-app-title" content="Einkauf">
+  <meta name="apple-mobile-web-app-status-bar-style" content="default">
+  <meta name="theme-color" content="#f6f6f3" media="(prefers-color-scheme: light)">
+  <meta name="theme-color" content="#151716" media="(prefers-color-scheme: dark)">
+  <link rel="manifest" href="manifest.webmanifest">
+  <link rel="apple-touch-icon" href="icons/apple-touch-icon.png">
+  <link rel="icon" type="image/png" href="icons/icon-192.png">
+  <link rel="stylesheet" href="styles.css">
+</head>
+<body>
+  <!-- Einkaufsliste -->
+  <section id="view-list" class="view">
+    <header class="top">
+      <div class="title-row">
+        <h1>Einkauf</h1>
+        <span class="badge" id="status"></span>
+      </div>
+      <nav class="list-tabs" id="list-tabs" aria-label="Listen"></nav>
+      <form class="add-form" id="add-form" autocomplete="off">
+        <input id="add-input" type="text" placeholder="Hinzufügen, z. B. 2 Milch" enterkeyhint="done" autocapitalize="sentences" aria-label="Artikel hinzufügen">
+        <button type="submit" aria-label="Hinzufügen">+</button>
+      </form>
+      <div class="suggest" id="suggest"></div>
+    </header>
+    <main class="content" id="list-body"></main>
+  </section>
+
+  <!-- Vorrat / immer im Haus -->
+  <section id="view-staples" class="view" hidden>
+    <header class="top">
+      <div class="title-row"><h1>Vorrat</h1></div>
+      <p class="lead">Tippe an, was fehlt – es landet sofort auf der Liste.</p>
+      <form class="add-form" id="staple-form" autocomplete="off">
+        <input id="staple-input" type="text" placeholder="Neuer Stammartikel, z. B. Milch" enterkeyhint="done" autocapitalize="sentences" aria-label="Stammartikel hinzufügen">
+        <button type="submit" aria-label="Stammartikel hinzufügen">+</button>
+      </form>
+    </header>
+    <main class="content" id="staples-body"></main>
+  </section>
+
+  <!-- Einstellungen -->
+  <section id="view-settings" class="view" hidden>
+    <header class="top"><div class="title-row"><h1>Einstellungen</h1></div></header>
+    <main class="content" id="settings-body"></main>
+  </section>
+
+  <nav class="tabbar" id="tabbar">
+    <button data-view="list" class="active"><span class="ti">🛒</span><span>Liste</span></button>
+    <button data-view="staples"><span class="ti">🏠</span><span>Vorrat</span></button>
+    <button data-view="settings"><span class="ti">⚙️</span><span>Einstellungen</span></button>
+  </nav>
+
+  <div class="sheet-wrap" id="sheet" hidden>
+    <div class="sheet" role="dialog" aria-modal="true" id="sheet-body"></div>
+  </div>
+
+  <div class="setup" id="setup" hidden></div>
+  <div class="toast" id="toast" hidden></div>
+
+  <script type="module" src="app.js"></script>
+</body>
+</html>
