@@ -1,9 +1,12 @@
 // Service Worker: hält die App offline startfähig (z. B. im Funkloch im Supermarkt).
 // Bei Änderungen an der App VERSION hochzählen, damit die iPhones die neue Version laden.
-const VERSION = 'einkauf-v1';
+const VERSION = 'einkauf-v2';
+const SDK = 'https://www.gstatic.com/firebasejs/11.0.2/';
 const SHELL = [
   './', 'index.html', 'styles.css', 'app.js', 'backend.js', 'categories.js', 'firebase-config.js',
   'manifest.webmanifest', 'icons/icon-192.png', 'icons/icon-512.png', 'icons/apple-touch-icon.png',
+  // Firebase-Bausteine gleich mit sichern – ohne sie startet die App offline nicht.
+  SDK + 'firebase-app.js', SDK + 'firebase-auth.js', SDK + 'firebase-firestore.js',
 ];
 
 self.addEventListener('install', e => {
@@ -27,12 +30,20 @@ self.addEventListener('fetch', e => {
   const firebaseSdk = url.hostname === 'www.gstatic.com' && url.pathname.startsWith('/firebasejs/');
   if (!sameOrigin && !firebaseSdk) return;
 
+  const fromCache = () => caches.match(request, { ignoreSearch: true })
+    .then(r => r || (request.mode === 'navigate' ? caches.match('index.html') : undefined));
+
+  const network = fetch(request).then(res => {
+    if (res.ok) { const copy = res.clone(); caches.open(VERSION).then(c => c.put(request, copy)); }
+    return res;
+  });
+
+  // Bei schlechtem Empfang nicht ewig warten: nach 3 Sekunden die gespeicherte Version nehmen.
+  const timeout = new Promise(resolve => setTimeout(resolve, 3000)).then(fromCache);
+
   e.respondWith(
-    fetch(request)
-      .then(res => {
-        if (res.ok) { const copy = res.clone(); caches.open(VERSION).then(c => c.put(request, copy)); }
-        return res;
-      })
-      .catch(() => caches.match(request, { ignoreSearch: true }).then(r => r || caches.match('index.html')))
+    Promise.race([network.catch(fromCache), timeout])
+      .then(r => r || network)
+      .catch(fromCache)
   );
 });
